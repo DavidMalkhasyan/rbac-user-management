@@ -21,10 +21,6 @@ A full-stack web application with Role-Based Access Control (RBAC). The app allo
 - MongoDB (Mongoose)
 - JWT authentication
 
-## 📸 Screenshots
-
-> (Добавь скриншоты позже, когда будет интерфейс)
-
 ## 📦 Installation
 
 1. **Clone the repository**
