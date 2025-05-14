@@ -1,0 +1,80 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Выравнивание по верхнему краю */
+  padding: 40px;
+  background: #f4f4f8;
+  min-height: 100vh;
+  flex-direction: column; /* Чтобы формы шли друг под другом */
+  gap: 30px; /* Отступ между формами */
+}
+
+.profile-form,
+.password-form {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.profile-form h2,
+.password-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.profile-form input,
+.password-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.profile-form input:focus,
+.password-form input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.profile-form button,
+.password-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4a90e2;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.profile-form button:hover,
+.password-form button:hover {
+  background-color: #357ab8;
+}
+
+.message {
+  margin-top: 15px;
+  text-align: center;
+  color: #28a745;
+}
+
+.profile-form button:disabled,
+.password-form button:disabled {
+  background-color: #ccc;
+}
+
+.message {
+  margin-top: 20px;
+  font-size: 16px;
+  color: green;
+}
