@@ -53,7 +53,7 @@ class AuthorizationServices {
     }
 
     generateToken(email) {
-        return jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "2h" });
+        return jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "24h" });
     }
 
     async sendEmail(to, subject, text) {
@@ -81,6 +81,7 @@ class AuthorizationServices {
     ) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            console.log({ email: decoded.email })
             const user = await User.findOne({ email: decoded.email });
 
             if (!user) {
@@ -141,6 +142,8 @@ class AuthorizationServices {
             user: {
                 email: user.email,
                 username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 role: user.role,
                 permissions: user.permissions,
                 id: user._id,

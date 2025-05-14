@@ -23,25 +23,34 @@ class usersServices {
     }
 
     async changeUser(id, { firstName, lastName, phone, username, password }) {
-      try {
-          const user = await User.findById(id);
-          if (!user) throw new Error("User not found");
-  
-          if (firstName) user.firstName = firstName;
-          if (lastName) user.lastName = lastName;
-          if (phone) user.phone = phone;
-          if (username) user.username = username;
-          if (password) {
-              const hashedPassword = await bcrypt.hash(password, saltRounds);
-              user.password = hashedPassword;
-          }
-  
-          await user.save();
-          return user;
-      } catch (error) {
-          throw new Error("Error updating user: " + error.message);
-      }
-  }
+        try {
+            const user = await User.findById(id);
+            if (!user) throw new Error("User not found");
+    
+            if (firstName) user.firstName = firstName;
+            if (lastName) user.lastName = lastName;
+            if (phone) user.phone = phone;
+            if (username) user.username = username;
+            if (password) {
+                const hashedPassword = await bcrypt.hash(password, saltRounds);
+                user.password = hashedPassword;
+            }
+    
+            await user.save();
+            return {
+                email: user.email,
+                username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                role: user.role,
+                permissions: user.permissions,
+            };
+        } catch (error) {
+            throw new Error("Error updating user: " + error.message);
+        }
+    }
+    
   
 }
 
