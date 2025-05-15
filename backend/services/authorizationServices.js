@@ -13,7 +13,21 @@ class AuthorizationServices {
         canDeleteClients,
         canAddClients,
     }) {
-        const token = this.generateToken(email);
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                email,
+                role: role || "user",
+                status: "not Active",
+                permissions: {
+                    canEditClients: canEditClients || false,
+                    canDeleteClients: canDeleteClients || false,
+                    canAddClients: canAddClients || false,
+                },
+            });
+        }
+
+        const token = this.generateToken(user);
         const link = `http://localhost:3000/authorization/verify?token=${token}`;
 
         try {
@@ -22,23 +36,6 @@ class AuthorizationServices {
                 "Authorization Link",
                 `Click here to authorize: ${link}`
             );
-            await User.updateOne(
-                { email },
-                {
-                    $setOnInsert: {
-                        email,
-                        role: role || "user",
-                        status: "not Active",
-                        permissions: {
-                            canEditClients: canEditClients || false,
-                            canDeleteClients: canDeleteClients || false,
-                            canAddClients: canAddClients || false,
-                        },
-                    },
-                },
-                { upsert: true }
-            );
-
             return {
                 status: 200,
                 message: "Authorization link sent successfully",
@@ -52,8 +49,12 @@ class AuthorizationServices {
         }
     }
 
-    generateToken(email) {
-        return jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "24h" });
+    generateToken(user) {
+        return jwt.sign(
+            { id: user._id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "24h" }
+        );
     }
 
     async sendEmail(to, subject, text) {
@@ -81,8 +82,7 @@ class AuthorizationServices {
     ) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            console.log({ email: decoded.email })
-            const user = await User.findOne({ email: decoded.email });
+            const user = await User.findById(decoded.id);
 
             if (!user) {
                 return {
@@ -99,6 +99,7 @@ class AuthorizationServices {
             user.phone = phone;
             user.username = username;
             user.password = hashedPassword;
+
             await user.save();
 
             return {
@@ -116,10 +117,12 @@ class AuthorizationServices {
 
     async login({ username, password }) {
         if (!username || !password) {
-            return res
-                .status(400)
-                .json({ message: "Email and password are required" });
+            return {
+                status: 400,
+                message: "Email and password are required",
+            };
         }
+
         const user = await User.findOne({ username });
         if (!user) {
             return {
@@ -127,6 +130,7 @@ class AuthorizationServices {
                 message: "User not found",
             };
         }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return {
@@ -134,7 +138,8 @@ class AuthorizationServices {
                 message: "Invalid password",
             };
         }
-        const token = this.generateToken(user.username);
+
+        const token = this.generateToken(user);
         return {
             status: 200,
             message: "Login successful",
@@ -152,14 +157,21 @@ class AuthorizationServices {
     }
 
     async sendPasswordRecovery({ email }) {
-        const token = this.generateToken(email);
+        const user = await User.findOne({ email });
+        if (!user) {
+            return {
+                status: 404,
+                message: "User not found",
+            };
+        }
+
+        const token = this.generateToken(user);
         const link = `http://localhost:3000/authorization/verifyPasswordRecovery?token=${token}`;
         try {
             await this.sendEmail(
                 email,
                 "Password Recovery",
-                `Click here to reset your password: ${link}`,
-                "If you did not request this, please ignore this email."
+                `Click here to reset your password: ${link}`
             );
             return {
                 status: 200,
@@ -173,22 +185,22 @@ class AuthorizationServices {
             };
         }
     }
-    
+
     async verifyPasswordRecovery(token, { password }) {
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-            const user = await User.findOne({ email: decoded.email });
+            const user = await User.findById(decoded.id);
+
             if (!user) {
                 return {
                     status: 404,
                     message: "User not found",
                 };
             }
-    
+
             const hashedPassword = await bcrypt.hash(password, saltRounds);
             user.password = hashedPassword;
-    
+
             await user.save();
             return {
                 status: 200,

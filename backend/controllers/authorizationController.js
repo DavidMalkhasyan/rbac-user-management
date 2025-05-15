@@ -22,7 +22,11 @@ class AuthorizationController {
 
     async login(req, res) {
         const response = await authorizationServices.login(req.body);
-        res.status(response.status).json({ message: response.message, user: response.user, token: response.token });
+        res.status(response.status).json({
+            message: response.message,
+            user: response.user,
+            token: response.token,
+        });
     }
 
     async sendPasswordRecovery(req, res) {
@@ -32,7 +36,7 @@ class AuthorizationController {
         res.status(response.status).json({ message: response.message });
     }
 
-    async verifyPasswordRecovery (req, res) {
+    async verifyPasswordRecovery(req, res) {
         const { token } = req.query;
         if (!token) {
             return res.status(400).json({ message: "Token is required" });
