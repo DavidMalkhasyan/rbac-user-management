@@ -33,10 +33,16 @@ const AdminPanel = () => {
       console.error(err);
     }
   };
-
+  const handleGoHome = () => {
+    navigate("/home"); 
+  };
+  
   return (
     <div className="admin-panel-container">
       <form className="admin-form" onSubmit={handleSubmit}>
+      <button onClick={handleGoHome} className="back-button">
+        ⬅ Back to Home
+      </button>
         <h2>Create User</h2>
 
         <input

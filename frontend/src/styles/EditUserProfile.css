@@ -65,3 +65,18 @@
   color: green;
   margin-top: 10px;
 }
+.back-button {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}

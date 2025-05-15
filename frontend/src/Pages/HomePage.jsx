@@ -3,58 +3,50 @@ import api from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import "../styles/HomePage.css";
 
-const HomePage = ({ currentUser }) => {
+const HomePage = () => {
     const [users, setUsers] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     const navigate = useNavigate();
-    const [userFirstName, setUserFirstName] = useState("Anonymous");
-    const [userLastName, setUserLastName] = useState("");
-    const [permissions, setPermissions] = useState({});
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user) {
-            setUserFirstName(user.user.firstName || "Anonymous");
-            setUserLastName(user.user.lastName || "");
-            setPermissions(user.user.permissions || {});
-        }
-
-        const fetchUsers = async () => {
+        const fetchData = async () => {
             try {
+                const local = JSON.parse(localStorage.getItem("user"));
+                if (local?.user) {
+                    setCurrentUser(local.user);
+                }
+    
                 const res = await api.get("users/all");
-                setUsers(res.data);
+                setUsers(res.data); 
             } catch (err) {
-                console.error("Error fetching users:", err);
+                console.error("somthing get wrong", err);
             }
         };
-
-        fetchUsers();
-    }, []);
+    
+        fetchData();
+    }, []);;
 
     const handleEdit = (id) => {
         navigate(`/edit/${id}`);
     };
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this user?"
-        );
+        const confirmDelete = window.confirm("Are you sure you want to delete this user?");
         if (!confirmDelete) return;
 
         try {
             await api.delete(`/users/${id}`);
-            setUsers((prevUsers) =>
-                prevUsers.filter((user) => user._id !== id)
-            );
+            setUsers((prev) => prev.filter((user) => user._id !== id));
         } catch (err) {
-          console.error("Error deleting user:", err.response?.data || err.message);
-          alert("Failed to delete user: " + (err.response?.data?.message || err.message));
+            console.error("Error deleting user:", err);
+            alert("Failed to delete user: " + err.message);
         }
     };
 
     const handleLogout = () => {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
-        navigate("/");
+        navigate("/login");
     };
 
     const handleProfileClick = () => {
@@ -62,35 +54,25 @@ const HomePage = ({ currentUser }) => {
     };
 
     const showAdminPanel =
-        permissions.canEditClients || permissions.canAddClients;
+        currentUser?.permissions?.canEditClients || currentUser?.permissions?.canAddClients;
 
     return (
         <div className="homepage-container">
             <nav className="navbar">
                 <div className="navbar-left">
                     {showAdminPanel && (
-                        <button
-                            className="admin-button"
-                            onClick={() => navigate("/admin")}
-                        >
+                        <button className="admin-button" onClick={() => navigate("/admin")}>
                             Admin Panel
                         </button>
                     )}
                 </div>
                 <div className="navbar-right">
                     <span
-                        className="profile-icon"
-                        onClick={handleProfileClick}
-                        style={{ cursor: "pointer" }}
-                    >
-                        👤
-                    </span>
-                    <span
                         className="profile-name"
                         onClick={handleProfileClick}
                         style={{ cursor: "pointer" }}
                     >
-                        {userFirstName} {userLastName}
+                        {currentUser?.firstName} {currentUser?.lastName}
                     </span>
                     <button className="logout-button" onClick={handleLogout}>
                         Logout
@@ -102,23 +84,19 @@ const HomePage = ({ currentUser }) => {
             <ul className="users-list">
                 {users.map((user) => (
                     <li className="user-card" key={user._id}>
-                        <span className="user-name">
-                            {user.firstName} {user.lastName} ({user.role})
-                        </span>
+                        <div className="user-info">
+                            <span className="user-name">
+                                {user.firstName} {user.lastName} ({user.role})
+                            </span>
+                        </div>
                         <div className="actions">
-                            {permissions.canEditClients && (
-                                <button
-                                    className="edit-button"
-                                    onClick={() => handleEdit(user._id)}
-                                >
+                            {currentUser?.permissions?.canEditClients && (
+                                <button className="edit-button" onClick={() => handleEdit(user._id)}>
                                     Edit
                                 </button>
                             )}
-                            {permissions.canDeleteClients && (
-                                <button
-                                    className="delete-button"
-                                    onClick={() => handleDelete(user._id)}
-                                >
+                            {currentUser?.permissions?.canDeleteClients && (
+                                <button className="delete-button" onClick={() => handleDelete(user._id)}>
                                     Delete
                                 </button>
                             )}

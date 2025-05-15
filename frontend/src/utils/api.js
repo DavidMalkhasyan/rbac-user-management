@@ -19,12 +19,16 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response, 
+  (response) => response,
   (error) => {
     if (error.response) {
       console.error('Error response:', error.response);
+
       if (error.response.status === 401) {
         console.error('Unauthorized, redirecting to login...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
       }
     } else if (error.request) {
       console.error('No response received:', error.request);

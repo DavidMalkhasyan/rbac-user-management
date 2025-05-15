@@ -1,143 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/myProfile.css';
-import api from '../utils/api'; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/myProfile.css";
+import api from "../utils/api";
 
 const MyProfile = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    username: '',
+    firstName: "",
+    lastName: "",
+    phone: "",
+    username: "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isDataChanged, setIsDataChanged] = useState(false); 
+  const [message, setMessage] = useState("");
+  const [isDataChanged, setIsDataChanged] = useState(false);
 
-  const userId = JSON.parse(localStorage.getItem('user')).id;  
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.user?.id;
 
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const res = await api.get(`/users/${userId}`); 
-        const userData = res.data;
-        setFormData(userData);
-      } catch (err) {
-        console.error('Error loading profile', err);
+        const res = await api.get(`/users/${userId}`);
+        setFormData({
+          firstName: res.data.firstName || "",
+          lastName: res.data.lastName || "",
+          phone: res.data.phone || "",
+          username: res.data.username || "",
+        });
+      } catch {
+        setMessage("Something went wrong");
       }
     }
 
-    fetchProfile();
+    if (userId) {
+      fetchProfile();
+    }
   }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setIsDataChanged(true);  
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setIsDataChanged(true);
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({ ...prev, [name]: value }));
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isDataChanged) {
-      setMessage('No changes made.');
+      setMessage("No changes detected");
       return;
     }
 
-    const confirmUpdate = window.confirm('Are you sure you want to save these changes?');
-    if (!confirmUpdate) return;
+    if (!window.confirm("Save changes?")) return;
 
     setIsSaving(true);
+
     try {
-      await api.put(`/users/${userId}`, formData);  
-      setMessage('Profile updated successfully!');
-      setIsDataChanged(false); 
+      await api.put(`/users/${userId}`, formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      setMessage("Profile updated");
+      setIsDataChanged(false);
     } catch (err) {
-      setMessage('Error updating profile.');
+      setMessage("Something went wrong");
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setMessage("New password and confirmation do not match.");
+      setMessage("Passwords do not match");
       return;
     }
 
-    setIsSaving(true);
     try {
-      await api.put(`/users/${userId}/password`, passwordData);
-      setMessage('Password updated successfully!');
+      await api.put(`/users/${userId}`, {
+        password: passwordData.newPassword,
+      });
+
+      setMessage("Password changed successfully");
       setPasswordData({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
     } catch (err) {
-      setMessage('Error changing password.');
+      setMessage(err.response?.data?.message || "Something went wrong");
     }
-    setIsSaving(false);
+  };
+
+  const handleGoHome = () => {
+    navigate("/home");
   };
 
   return (
     <div className="profile-container">
+      <button onClick={handleGoHome} className="back-button">
+        ⬅ Back to Home
+      </button>
+
       <form className="profile-form" onSubmit={handleSubmit}>
         <h2>My Profile</h2>
 
-        <div className="profile-data">
-          <p><strong>First Name:</strong> {formData.firstName}</p>
-          <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            value={formData.firstName}
-            onChange={handleChange}
-          />
-
-          <p><strong>Last Name:</strong> {formData.lastName}</p>
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            value={formData.lastName}
-            onChange={handleChange}
-          />
-
-          <p><strong>Phone:</strong> {formData.phone}</p>
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-
-          <p><strong>Username:</strong> {formData.username}</p>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            disabled
-          />
-        </div>
+        <input
+          type="text"
+          name="firstName"
+          placeholder="First Name"
+          value={formData.firstName}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Last Name"
+          value={formData.lastName}
+          onChange={handleChange}
+        />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+        <input type="text" name="username" value={formData.username} disabled />
 
         <button type="submit" disabled={isSaving || !isDataChanged}>
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          {isSaving ? "Saving..." : "Save Changes"}
         </button>
 
         {message && <p className="message">{message}</p>}
@@ -153,7 +161,6 @@ const MyProfile = () => {
           value={passwordData.oldPassword}
           onChange={handlePasswordChange}
         />
-
         <input
           type="password"
           name="newPassword"
@@ -161,20 +168,14 @@ const MyProfile = () => {
           value={passwordData.newPassword}
           onChange={handlePasswordChange}
         />
-
         <input
           type="password"
           name="confirmPassword"
-          placeholder="Confirm New Password"
+          placeholder="Confirm Password"
           value={passwordData.confirmPassword}
           onChange={handlePasswordChange}
         />
-
-        <button type="submit" disabled={isSaving}>
-          {isSaving ? 'Changing Password...' : 'Change Password'}
-        </button>
-
-        {message && <p className="message">{message}</p>}
+        <button type="submit">Update Password</button>
       </form>
     </div>
   );

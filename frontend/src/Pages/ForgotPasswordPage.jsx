@@ -17,7 +17,7 @@ const ForgotPasswordPage = () => {
       await api.post("/authorization/sendPasswordRecovery", { email });
       setSent(true);
       setTimeout(
-      navigate("/")
+      navigate("/login")
     ,1500);
     } catch (err) {
       setError("Failed to send email. Try again.");

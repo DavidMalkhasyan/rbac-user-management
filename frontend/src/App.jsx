@@ -16,7 +16,7 @@ const App = () => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LoginPage />} />
+                <Route path="/login" element={<LoginPage />} />
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
