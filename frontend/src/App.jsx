@@ -3,6 +3,7 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
+    Navigate,
 } from "react-router-dom";
 import HomePage from "./Pages/HomePage";
 import AdminPanel from "./Pages/AdminPanel";
@@ -24,6 +25,8 @@ const App = () => {
                 <Route path="/my-profile" element={<MyProfile />} />
                 <Route path="/edit/:id" element={<EditUserProfile />} /> 
                 <Route path="authorization/verifyPasswordRecovery" element={<ResetPassword />} />
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </Router>
     );
