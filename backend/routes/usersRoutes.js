@@ -5,6 +5,10 @@ import authenticateToken from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/me", authenticateToken, (req, res) => {
+    usersControllers.getMe(req, res);
+});
+
 router.get("/all", authenticateToken, (req, res) => {
     usersControllers.getAllUsers(req, res);
 });

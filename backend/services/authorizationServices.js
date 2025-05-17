@@ -142,17 +142,7 @@ class AuthorizationServices {
         const token = this.generateToken(user);
         return {
             status: 200,
-            message: "Login successful",
             token,
-            user: {
-                email: user.email,
-                username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role,
-                permissions: user.permissions,
-                id: user._id,
-            },
         };
     }
 

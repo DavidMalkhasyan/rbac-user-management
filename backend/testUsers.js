@@ -18,7 +18,7 @@ try {
                 canDeleteClients: false,
                 canAddClients: false,
             },
-            avatar: "",
+            avatar: `avatar${i+1}.svg`,
             status: "active",
             firstName: `userName${i + 1}`,
             lastName: `userLastname${i + 1}`,

@@ -23,7 +23,6 @@ class AuthorizationController {
     async login(req, res) {
         const response = await authorizationServices.login(req.body);
         res.status(response.status).json({
-            message: response.message,
             user: response.user,
             token: response.token,
         });

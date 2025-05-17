@@ -1,6 +1,16 @@
 import usersServices from "../services/usersServices.js";
 import User from "../models/User.js";
 class usersControllers {
+    async getMe (req, res) {
+        try{
+            const user = await usersServices.findById(req.user.id);
+            if (!user)
+                return res.status(404).json({ message: "User not found" });
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
     async getAllUsers(req, res) {
         try {
             const users = await User.find({ status: "active" });

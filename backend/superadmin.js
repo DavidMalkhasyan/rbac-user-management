@@ -25,7 +25,7 @@ try {
             canDeleteClients: true,
             canAddClients: true,
         },
-        avatar: "",
+        avatar: "avatar.svg",
         status: "Active",
         firstName: "Super",
         lastName: "Admin",
