@@ -123,9 +123,9 @@ const EditUserProfile = () => {
                     <div className="permissions-section">
                         <h4>Permissions</h4>
                         {[
-                            "canEditClients",
-                            "canDeleteClients",
-                            "canAddClients",
+                            "Edit Clients",
+                            "Delete Clients",
+                            "Add Clients",
                         ].map((perm) => (
                             <label key={perm}>
                                 <input
