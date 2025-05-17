@@ -6,8 +6,6 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authorizationRoutes from "./routes/authorizationRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
-import bcrypt from "bcrypt";
-import User from "./models/User.js";
 
 connectDB();
 

@@ -40,7 +40,7 @@ class usersControllers {
             const updateData = { ...req.body };
 
             if (req.file) {
-                updateData.avatar = "/" + req.file.path.replace(/\\/g, "/");
+                updateData.avatar = req.file.filename;
             }
 
             const updatedUser = await usersServices.changeUser(
