@@ -18,6 +18,7 @@ try {
                 canDeleteClients: false,
                 canAddClients: false,
             },
+            phone: `+380123456789${i}`,
             avatar: `avatar${i+1}.svg`,
             status: "active",
             firstName: `userName${i + 1}`,

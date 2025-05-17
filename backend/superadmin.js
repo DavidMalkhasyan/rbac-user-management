@@ -25,6 +25,7 @@ try {
             canDeleteClients: true,
             canAddClients: true,
         },
+        phone: `+380123456789${i}`,
         avatar: "avatar.svg",
         status: "Active",
         firstName: "Super",
