@@ -5,8 +5,9 @@ import "../styles/HomePage.css";
 
 const HomePage = () => {
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-    const [imageUrl, setImageUrl] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,8 +16,9 @@ const HomePage = () => {
                 const resCurrent = await api.get("/users/me");
                 setCurrentUser(resCurrent.data);
 
-                const resAll = await api.get("users/all");
+                const resAll = await api.get("/users/all");
                 setUsers(resAll.data);
+                setFilteredUsers(resAll.data);
             } catch (err) {
                 console.error("Error in uploading", err);
             }
@@ -25,20 +27,14 @@ const HomePage = () => {
     }, []);
 
     useEffect(() => {
-        const fetchImage = async () => {
-            try {
-                const res = await api.get("/uploads/avatar.svg", {
-                    responseType: "blob",
-                });
-                const imageBlob = res.data;
-                const imageObjectURL = URL.createObjectURL(imageBlob);
-                setImageUrl(imageObjectURL);
-            } catch (err) {
-                console.error("Ошибка при загрузке изображения", err);
-            }
-        };
-        fetchImage();
-    }, []);
+        const term = searchTerm.toLowerCase();
+        const filtered = users.filter(
+            (user) =>
+                user.firstName.toLowerCase().includes(term) ||
+                user.lastName.toLowerCase().includes(term)
+        );
+        setFilteredUsers(filtered);
+    }, [searchTerm, users]);
 
     const handleEdit = (id) => {
         navigate(`/edit/${id}`);
@@ -111,8 +107,17 @@ const HomePage = () => {
             </nav>
 
             <h1 className="title">All Users</h1>
+
+            <input
+                type="text"
+                placeholder="Search by first or last name"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+            />
+
             <ul className="users-list">
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                     <li className="user-card" key={user._id}>
                         <div className="user-info">
                             <img
@@ -141,6 +146,12 @@ const HomePage = () => {
                                     Delete
                                 </button>
                             )}
+                            <button
+                                className="details-button"
+                                onClick={() => navigate(`/users/${user._id}`)}
+                            >
+                                Details
+                            </button>
                         </div>
                     </li>
                 ))}

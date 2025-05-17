@@ -13,6 +13,7 @@ import VerifyPage from "./Pages/VerifyPage";
 import MyProfile from "./Pages/MyProfile";
 import EditUserProfile from "./Pages/EditUserProfile";
 import ResetPassword from "./Pages/ResetPassword";
+import UserDetails from "./Components/UserDetails.jsx";
 const App = () => {
     return (
         <Router>
@@ -27,6 +28,7 @@ const App = () => {
                 <Route path="authorization/verifyPasswordRecovery" element={<ResetPassword />} />
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="*" element={<Navigate to="/login" replace />} />
+                <Route path="/users/:id" element={<UserDetails />} />
             </Routes>
         </Router>
     );
