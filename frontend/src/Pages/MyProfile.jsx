@@ -9,8 +9,10 @@ const MyProfile = () => {
     lastName: "",
     phone: "",
     username: "",
+    avatar: "",
   });
 
+  const [file, setFile] = useState(null);
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -20,35 +22,45 @@ const MyProfile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [isDataChanged, setIsDataChanged] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.user?.id;
 
   useEffect(() => {
-    async function fetchProfile() {
+    const fetchProfile = async () => {
       try {
-        const res = await api.get(`/users/${userId}`);
-        setFormData({
-          firstName: res.data.firstName || "",
-          lastName: res.data.lastName || "",
-          phone: res.data.phone || "",
-          username: res.data.username || "",
-        });
-      } catch {
-        setMessage("Something went wrong");
-      }
-    }
+        const res = await api.get("/users/me");
+        const user = res.data;
 
-    if (userId) {
-      fetchProfile();
-    }
-  }, [userId]);
+        setUserId(user._id); 
+
+        setFormData({
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          phone: user.phone || "",
+          username: user.username || "",
+          avatar: user.avatar || "",
+        });
+      } catch (err) {
+        setMessage("Failed to load profile");
+        console.error("Error loading profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setIsDataChanged(true);
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+      setIsDataChanged(true);
+    }
   };
 
   const handlePasswordChange = (e) => {
@@ -67,11 +79,20 @@ const MyProfile = () => {
     if (!window.confirm("Save changes?")) return;
 
     setIsSaving(true);
+    setMessage("");
 
     try {
-      await api.put(`/users/${userId}`, formData, {
+      const data = new FormData();
+      data.append("firstName", formData.firstName);
+      data.append("lastName", formData.lastName);
+      data.append("phone", formData.phone);
+      if (file) {
+        data.append("photo", file);
+      }
+
+      await api.put(`/users/${userId}`, data, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -117,7 +138,6 @@ const MyProfile = () => {
       <button onClick={handleGoHome} className="back-button">
         ⬅ Back to Home
       </button>
-
       <form className="profile-form" onSubmit={handleSubmit}>
         <h2>My Profile</h2>
 
@@ -143,6 +163,8 @@ const MyProfile = () => {
           onChange={handleChange}
         />
         <input type="text" name="username" value={formData.username} disabled />
+
+        <input type="file" accept="image/*" onChange={handleFileChange} />
 
         <button type="submit" disabled={isSaving || !isDataChanged}>
           {isSaving ? "Saving..." : "Save Changes"}

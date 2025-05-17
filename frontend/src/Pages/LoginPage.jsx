@@ -19,7 +19,6 @@ const LoginPage = () => {
                 username,
                 password,
             });
-            localStorage.setItem("user", JSON.stringify(res.data));
             setSuccess("Login successful!");
             localStorage.setItem("token", res.data.token);
             navigate("/home");

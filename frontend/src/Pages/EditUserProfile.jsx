@@ -20,22 +20,25 @@ const EditUserProfile = () => {
     const [message, setMessage] = useState("");
 
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get(`/users/${id}`);
-                setFormData(res.data);
+                const [userRes, currentUserRes] = await Promise.all([
+                    api.get(`/users/${id}`),
+                    api.get("/users/me")
+                ]);
+    
+                setFormData(userRes.data);
+    
+                if (currentUserRes.data?.role === "admin") {
+                    setIsAdmin(true);
+                }
             } catch (err) {
-                console.error("Error fetching user:", err);
+                console.error("Error fetching data:", err);
             }
         };
-
-        const currentUser = JSON.parse(localStorage.getItem("user"));
-        if (currentUser?.user?.role === "admin") {
-            setIsAdmin(true);
-        }
-
-        fetchUser();
-    }, [id]);
+    
+        fetchData();
+    }, [id]);    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
