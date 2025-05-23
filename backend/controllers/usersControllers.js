@@ -36,18 +36,18 @@ class usersControllers {
             const user = await usersServices.findById(req.params.id);
             if (!user)
                 return res.status(404).json({ message: "User not found" });
-
+    
             const updateData = { ...req.body };
-
-            if (req.file) {
-                updateData.avatar = req.file.filename;
+    
+            if (req.file && req.file.id) {
+                updateData.avatarFileId = req.file.id.toString();
             }
-
+    
             const updatedUser = await usersServices.changeUser(
                 req.params.id,
                 updateData
             );
-
+    
             res.status(200).json({
                 message: "User updated successfully",
                 user: updatedUser,
@@ -56,6 +56,7 @@ class usersControllers {
             res.status(500).json({ message: error.message });
         }
     }
+    
 
     async deleteUser(req, res) {
         try {
