@@ -19,10 +19,11 @@ const MyProfile = () => {
     confirmPassword: "",
   });
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isDataChanged, setIsDataChanged] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDataChanged, setIsDataChanged] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -32,8 +33,7 @@ const MyProfile = () => {
         const res = await api.get("/users/me");
         const user = res.data;
 
-        setUserId(user._id); 
-
+        setUserId(user._id);
         setFormData({
           firstName: user.firstName || "",
           lastName: user.lastName || "",
@@ -43,7 +43,6 @@ const MyProfile = () => {
         });
       } catch (err) {
         setMessage("Failed to load profile");
-        console.error("Error loading profile:", err);
       }
     };
 
@@ -59,7 +58,30 @@ const MyProfile = () => {
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
       setFile(e.target.files[0]);
-      setIsDataChanged(true);
+      setPhotoMessage("");
+    }
+  };
+
+  const handlePhotoUpload = async () => {
+    if (!file) {
+      setPhotoMessage("No photo selected");
+      return;
+    }
+
+    try {
+      const data = new FormData();
+      data.append("avatar", file);
+
+      await api.put(`api/photos/${userId}`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setPhotoMessage("Photo uploaded successfully");
+      setFile(null);
+    } catch (err) {
+      setPhotoMessage("Photo upload failed");
     }
   };
 
@@ -82,24 +104,17 @@ const MyProfile = () => {
     setMessage("");
 
     try {
-      const data = new FormData();
-      data.append("firstName", formData.firstName);
-      data.append("lastName", formData.lastName);
-      data.append("phone", formData.phone);
-      if (file) {
-        data.append("photo", file);
-      }
+      const data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      };
 
-      await api.put(`/users/${userId}`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+      await api.put(`/users/${userId}`, data);
       setMessage("Profile updated");
       setIsDataChanged(false);
     } catch (err) {
-      setMessage("Something went wrong");
+      setMessage("Update failed");
     } finally {
       setIsSaving(false);
     }
@@ -138,6 +153,7 @@ const MyProfile = () => {
       <button onClick={handleGoHome} className="back-button">
         ⬅ Back to Home
       </button>
+
       <form className="profile-form" onSubmit={handleSubmit}>
         <h2>My Profile</h2>
 
@@ -162,9 +178,12 @@ const MyProfile = () => {
           value={formData.phone}
           onChange={handleChange}
         />
-        <input type="text" name="username" value={formData.username} disabled />
-
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <input
+          type="text"
+          name="username"
+          value={formData.username}
+          disabled
+        />
 
         <button type="submit" disabled={isSaving || !isDataChanged}>
           {isSaving ? "Saving..." : "Save Changes"}
@@ -172,6 +191,15 @@ const MyProfile = () => {
 
         {message && <p className="message">{message}</p>}
       </form>
+
+      <div className="photo-upload">
+        <h3>Upload Avatar</h3>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <button type="button" onClick={handlePhotoUpload}>
+          Upload Photo
+        </button>
+        {photoMessage && <p className="message">{photoMessage}</p>}
+      </div>
 
       <form className="password-form" onSubmit={handlePasswordSubmit}>
         <h2>Change Password</h2>

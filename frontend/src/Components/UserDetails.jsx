@@ -36,7 +36,7 @@ const UserDetails = () => {
                 {user.firstName} {user.lastName} ({user.role})
             </h2>
             <img
-                src={`http://localhost:5000/uploads/${user.avatar}`}
+                src={`http://localhost:5000/api/photos/${user._id}`}
                 alt={`${user.firstName} ${user.lastName}`}
                 className="user-details-avatar"
             />

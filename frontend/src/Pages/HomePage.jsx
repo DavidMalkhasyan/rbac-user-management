@@ -20,7 +20,7 @@ const HomePage = () => {
                 setUsers(resAll.data);
                 setFilteredUsers(resAll.data);
             } catch (err) {
-                console.error("Error in uploading", err);
+                console.error("Error in fetching users:", err);
             }
         };
         fetchData();
@@ -41,16 +41,14 @@ const HomePage = () => {
     };
 
     const handleDelete = async (id) => {
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this user?"
-        );
+        const confirmDelete = window.confirm("Are you sure you want to delete this user?");
         if (!confirmDelete) return;
 
         try {
             await api.delete(`/users/${id}`);
             setUsers((prev) => prev.filter((user) => user._id !== id));
         } catch (err) {
-            console.error("Ошибка при удалении пользователя:", err);
+            console.error("Error deleting user:", err);
             alert("Failed to delete user: " + err.message);
         }
     };
@@ -67,6 +65,8 @@ const HomePage = () => {
     const showAdminPanel =
         currentUser?.permissions?.canEditClients ||
         currentUser?.permissions?.canAddClients;
+
+    const getAvatarUrl = (id) => `http://localhost:5000/api/photos/${id}`;
 
     return (
         <div className="homepage-container">
@@ -85,7 +85,7 @@ const HomePage = () => {
                     <div>
                         {currentUser?.avatar ? (
                             <img
-                                src={`http://localhost:5000/uploads/${currentUser.avatar}`}
+                                src={getAvatarUrl(currentUser._id)}
                                 alt={`${currentUser.firstName} ${currentUser.lastName}`}
                                 className="user-avatar"
                             />
@@ -120,11 +120,17 @@ const HomePage = () => {
                 {filteredUsers.map((user) => (
                     <li className="user-card" key={user._id}>
                         <div className="user-info">
-                            <img
-                                src={`http://localhost:5000/uploads/${user.avatar}`}
-                                alt={`${user.firstName} ${user.lastName}`}
-                                className="user-avatar"
-                            />
+                            {user.avatar ? (
+                                <img
+                                    src={getAvatarUrl(user._id)}
+                                    alt={`${user.firstName} ${user.lastName}`}
+                                    className="user-avatar"
+                                />
+                            ) : user.role === "superAdmin" ? (
+                                <div className="user-avatar-placeholder">Super Admin</div>
+                            ) : (
+                                <div className="user-avatar-placeholder">No image</div>
+                            )}
                             <span className="user-name">
                                 {user.firstName} {user.lastName} ({user.role})
                             </span>
